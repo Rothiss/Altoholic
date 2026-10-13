@@ -144,6 +144,24 @@
 					</Anchor>
 				</Anchors>
 			</Button>
+			<Button name="$parentSurvival" inherits="SkillButtonTemplate" id="8">
+				<Anchors>
+					<Anchor point="BOTTOMLEFT" relativeTo="$parentRiding" relativePoint="BOTTOMRIGHT">
+						<Offset>
+							<AbsDimension x="5" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<Button name="$parentDisguise" inherits="SkillButtonTemplate" id="9">
+				<Anchors>
+					<Anchor point="BOTTOMLEFT" relativeTo="$parentSurvival" relativePoint="BOTTOMRIGHT">
+						<Offset>
+							<AbsDimension x="5" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
 		</Frames>
 	</Button>
 

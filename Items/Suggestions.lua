@@ -155,7 +155,7 @@ Altoholic.Suggestions = {
 		{ 125, "Up to 125: Mine Tin, Silver, Incendicite and Lesser Bloodstone\n\nMine Incendicite at Thelgen Rock (Wetlands)\nEasy leveling up to 125" },
 		{ 175, "Up to 175: Mine Iron and Gold\nDesolace, Ashenvale, Badlands, Arathi Highlands,\nAlterac Mountains, Stranglethorn Vale, Swamp of Sorrows" },
 		{ 250, "Up to 250: Mine Mithril and Truesilver\nBlasted Lands, Searing Gorge, Badlands, The Hinterlands,\nWestern Plaguelands, Azshara, Winterspring, Felwood, Stonetalon Mountains, Tanaris" },
-		{ 300, "Up to 300: Mine Thorium \nUn’goro Crater, Azshara, Winterspring, Blasted Lands\nSearing Gorge, Burning Steppes, Eastern Plaguelands, Western Plaguelands" }
+		{ 300, "Up to 300: Mine Thorium \nUnï¿½goro Crater, Azshara, Winterspring, Blasted Lands\nSearing Gorge, Burning Steppes, Eastern Plaguelands, Western Plaguelands" }
 	},
 	[L["Herbalism"]] = {
 		{ 50, "Up to 50: Collect Silverleaf and Peacebloom\nAvailable in all starting zones" },
@@ -220,6 +220,43 @@ Altoholic.Suggestions = {
 		{ 250, "Up to 250: Hinterlands, Tanaris\n\n|cFFFFFFFFFishing quest in Dustwallow Marsh\n|cFFFFD700Savage Coast Blue Sailfin (Stranglethorn Vale)\nFeralas Ahi (Verdantis River, Feralas)\nSer'theris Striker (Northern Sartheris Strand, Desolace)\nMisty Reed Mahi Mahi (Swamp of Sorrows coastline)" },
 		{ 260, "Up to 260: Felwood" },
 		{ 300, "Up to 300: Azshara" }
+	},
+	
+	-- ** OctoWoW / Turtle WoW custom professions **
+	[L["Jewelcrafting"]] = {
+		{ 15, "Up to 15: Bright Copper Ring" },
+		{ 35, "Up to 35: Inlaid Copper Ring" },
+		{ 50, "Up to 50: Encrusted Copper Bangle" },
+		{ 75, "Up to 75: Ebon Ring" },
+		{ 90, "Up to 90: Rough Bronze Ring" },
+		{ 105, "Up to 105: Bronze Cuffed Bangles" },
+		{ 125, "Up to 125: Coarse Gemstone Cluster" },
+		{ 150, "Up to 150: Heavy Gemstone Cluster" },
+		{ 175, "Up to 175: Rough Mithril Ring" },
+		{ 200, "Up to 200: Solid Gemstone Cluster" },
+		{ 225, "Up to 225: Burning Star Gemstone" },
+		{ 250, "Up to 250: Dense Gemstone Cluster" },
+		{ 275, "Up to 275: Azerothian Ruby Gemstone" },
+		{ 300, "Up to 300: Mastercrafted Diamond Crown" }
+	},
+	[L["Survival"]] = {
+		{ 5, "Up to 5: Bundle of Simple Sticks" },
+		{ 15, "Up to 15: Crude Hatchet" },
+		{ 30, "Up to 30: Simple Slingshot" },
+		{ 50, "Up to 50: Weak Healing Salve" },
+		{ 80, "Up to 80: Traveler's Tent" },
+		{ 100, "Up to 100: Healing Salve" },
+		{ 125, "Up to 125: Murloc Scale Coat" },
+		{ 150, "Up to 150: Potent Healing Salve" },
+		{ 175, "Up to 175: Firefin Fishing Trap" },
+		{ 200, "Up to 200: Superior Healing Salve" },
+		{ 225, "Up to 225: Bundle of Tropical Sticks" },
+		{ 250, "Up to 250: Premium Fishing Lure" },
+		{ 275, "Up to 275: Mastercraft Fishing Rod" },
+		{ 300, "Up to 300: Major Healing Salve" }
+	},
+	[L["Disguise"]] = {
+		{ 300, "Up to 300: All disguise patterns are vendor-taught\n(Defias, South Seas Pirate, Stonesplinter Trogg, Syndicate, ...)" }
 	},
 	
 	-- suggested leveling zones, compiled by Thaoky, based on too many sources to list + my own leveling experience on Alliance side

@@ -253,8 +253,29 @@ local ProfessionList = {
 	BI["Fishing"],
 	L["Riding"],
 	L["Poisons"],
-	L["Lockpicking"]
+	L["Lockpicking"],
+	-- OctoWoW / Turtle WoW custom professions (id 14+)
+	L["Jewelcrafting"],
+	L["Survival"],
+	L["Disguise"]
 }
+
+-- OctoWoW runs a repacked Turtle 1.18.1 client, so detect custom-content
+-- clients by version global, build string, or the OctoWoW realm names.
+function Altoholic:IsTurtleLike()
+	if V.IsTurtleLike == nil then
+		local build = GetBuildInfo()
+		V.IsTurtleLike = (getglobal("TURTLE_WOW_VERSION") ~= nil)
+			or (build == "1.18.1") or (build == "1.17.2")
+		if not V.IsTurtleLike then
+			local realm = GetRealmName()
+			if realm and (string.find(realm, "N'Zoth") or string.find(realm, "C'Thun") or string.find(realm, "Y'Shaarj")) then
+				V.IsTurtleLike = true
+			end
+		end
+	end
+	return V.IsTurtleLike
+end
 
 Altoholic.equipment = {
 	{ color = "|cFF69CCF0", name = BI["Head"], icon = "Interface\\PaperDoll\\UI-PaperDoll-Slot-Head"},
@@ -361,6 +382,7 @@ function Altoholic:OnEnable()
 		getglobal(repFrame.."ClassesItem" .. j):SetPoint("BOTTOMRIGHT", repFrame.."ClassesItem" .. (j + 1), "BOTTOMLEFT", -5, 0);
 	end
 	self:CreateScrollLines("AltoSkills", "SkillsTemplate", 14);
+	self:ConfigureSkillColumns()
 	self:CreateScrollLines("AltoQuests", "QuestEntryTemplate", 14);
 	self:CreateScrollLines("AltoRecipes", "RecipesEntryTemplate", 14);
 	self:CreateScrollLines("AltoAuctions", "AuctionEntryTemplate", 7);
@@ -372,6 +394,7 @@ function Altoholic:OnEnable()
 	self:BuildRecipesSubMenu()
 	self:BuildAuctionsSubMenu()
 	self:BuildBidsSubMenu()
+	self:BuildCustomRecipeSearch()
 	local O = self.db.account.options
 	getglobal("AltoOptions_SliderAngle"):SetValue(O.MinimapIconAngle)
 	getglobal("AltoOptions_SliderRadius"):SetValue(O.MinimapIconRadius)
@@ -477,6 +500,8 @@ function Altoholic:BuildCharacterInfoTable()
 				V.SkillsCache[4] = self:GetSkillInfo( c.skill[L["Secondary Skills"]][BI["First Aid"]] )
 				V.SkillsCache[5] = self:GetSkillInfo( c.skill[L["Secondary Skills"]][BI["Fishing"]] )
 				V.SkillsCache[6] = self:GetSkillInfo( c.skill[L["Secondary Skills"]][L["Riding"]] )
+				V.SkillsCache[7] = self:GetSkillInfo( c.skill[L["Secondary Skills"]][L["Survival"]] )
+				V.SkillsCache[8] = self:GetSkillInfo( c.skill[L["Secondary Skills"]][L["Disguise"]] )
 				local color = self:GetClassColor(c.class)
 				local bank
 				if (c.bankslots == nil) or (c.bankslots == "") then
@@ -495,6 +520,8 @@ function Altoholic:BuildCharacterInfoTable()
 					firstaid = V.SkillsCache[4],
 					fishing = V.SkillsCache[5],
 					riding = V.SkillsCache[6],
+					survival = V.SkillsCache[7],
+					disguise = V.SkillsCache[8],
 				} )
 				realmlevels = realmlevels + c.level
 				realmmoney = realmmoney + c.money
@@ -1056,6 +1083,17 @@ function Altoholic:BuildQuestsSubMenu()
 	end
 end
 
+-- Add OctoWoW/Turtle custom professions to the Search > Recipe submenu (custom clients only)
+function Altoholic:BuildCustomRecipeSearch()
+	if not self:IsTurtleLike() or V.CustomRecipeSearchAdded then return end
+	local recipeMenu = self.Menu[MENU_SEARCH].subMenu[5].subMenu
+	if not recipeMenu then return end
+	table.insert(recipeMenu, { name = L["Jewelcrafting"], OnClick = function() Altoholic:SearchItem(BI["Recipe"], L["Jewelcrafting"]) end })
+	table.insert(recipeMenu, { name = L["Survival"], OnClick = function() Altoholic:SearchItem(BI["Recipe"], L["Survival"]) end })
+	table.insert(recipeMenu, { name = L["Disguise"], OnClick = function() Altoholic:SearchItem(BI["Recipe"], L["Disguise"]) end })
+	V.CustomRecipeSearchAdded = true
+end
+
 function Altoholic:BuildRecipesSubMenu()
     self.Menu[MENU_RECIPES].subMenu = nil
     self.Menu[MENU_RECIPES].subMenu = {}
@@ -1088,19 +1126,22 @@ function Altoholic:BuildRecipesSubMenu()
 					end
 				} )
 				for TradeSkillName, _ in pairs(c.recipes) do
-                    local skillsID = Altoholic:GetProfessionID(TradeSkillName) + (n * 10000) + (i * 100)
-                    table.insert(self.Menu[MENU_RECIPES].subMenu[n].subMenu[i].subMenu, {
-                        name = TradeSkillName,
-                        id = Altoholic:GetProfessionID(TradeSkillName) + (n * 10000) + (i * 100),
-                        OnClick = function(self)
-                            local id = skillsID
-                            local skillID = mod(id, 100)
-                            id = floor(id / 100)
-                            Altoholic:SelectAlt(altID)
-                            Altoholic:SelectProfession(skillID)
-                            Altoholic:ActivateMenuItem("AltoRecipes")
-                        end
-                    } )
+                    local profID = Altoholic:GetProfessionID(TradeSkillName)
+                    if profID then
+                        local skillsID = profID + (n * 10000) + (i * 100)
+                        table.insert(self.Menu[MENU_RECIPES].subMenu[n].subMenu[i].subMenu, {
+                            name = TradeSkillName,
+                            id = profID + (n * 10000) + (i * 100),
+                            OnClick = function(self)
+                                local id = skillsID
+                                local skillID = mod(id, 100)
+                                id = floor(id / 100)
+                                Altoholic:SelectAlt(altID)
+                                Altoholic:SelectProfession(skillID)
+                                Altoholic:ActivateMenuItem("AltoRecipes")
+                            end
+                        } )
+                    end
 				end
 				i = i + 1
 			end
@@ -1227,9 +1268,9 @@ function Altoholic:SelectProfession(id)
 		if id == i then
 			local ProfessionLevel
 			V.CurrentProfession = ProfessionList[i]
-			if id < 8 then
+			if (id <= 7) or (id == 14) then		-- primary professions (incl. Jewelcrafting)
 				ProfessionLevel = char.skill[L["Professions"]][V.CurrentProfession]
-			elseif (id >= 8) and (id <= 11) then
+			elseif ((id >= 8) and (id <= 11)) or (id == 15) or (id == 16) then	-- secondary (incl. Survival, Disguise)
 				ProfessionLevel = char.skill[L["Secondary Skills"]][V.CurrentProfession]
 			elseif (id == 12) or (id == 13) then
 				if char.class ~= L["Rogue"] then
@@ -1287,6 +1328,34 @@ function Altoholic:CreateEntryCache(prefix, numLines, ...)
 	end
 	self.EntryCaches[prefix] = cache
 	return cache
+end
+
+-- The Skills screen has two extra columns for OctoWoW/Turtle custom secondary
+-- professions (Survival, Disguise). They are hidden on other clients, and the
+-- skill columns are narrowed on custom clients so all 8 fit the 615px row.
+local SKILL_COLUMNS = { "Skill1", "Skill2", "Cooking", "FirstAid", "Fishing", "Riding", "Survival", "Disguise" }
+function Altoholic:ConfigureSkillColumns()
+	local turtleLike = self:IsTurtleLike()
+	local width = turtleLike and 46 or 60
+	for i = 1, 14 do
+		local entry = "AltoSkillsEntry" .. i
+		for _, col in ipairs(SKILL_COLUMNS) do
+			local btn = getglobal(entry .. col)
+			if btn then
+				btn:SetWidth(width)
+				local txt = getglobal(entry .. col .. "NormalText")
+				if txt then txt:SetWidth(width) end
+			end
+		end
+		local survival = getglobal(entry .. "Survival")
+		if survival then
+			if turtleLike then survival:Show() else survival:Hide() end
+		end
+		local disguise = getglobal(entry .. "Disguise")
+		if disguise then
+			if turtleLike then disguise:Show() else disguise:Hide() end
+		end
+	end
 end
 
 function Altoholic_GetItemLink(itemID)

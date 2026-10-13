@@ -56,7 +56,7 @@ function Altoholic:Auctions_Update_Auctions()
 			
 			getglobal(entry..i.."Price"):SetText(self:GetMoneyString(s.startPrice) .. "\n"  
 					.. GREEN .. BUYOUT .. ": " ..  self:GetMoneyString(s.buyoutPrice))
-            getglobal(entry..i.."ItemIconTexture"):SetTexture(select(10, GetItemInfo(s.id)));
+            getglobal(entry..i.."ItemIconTexture"):SetTexture(select(9, GetItemInfo(s.id)));
 			if (s.count ~= nil) and (s.count > 1) then
 				getglobal(entry..i.."ItemCount"):SetText(s.count)
 				getglobal(entry..i.."ItemCount"):Show()
@@ -119,7 +119,7 @@ function Altoholic:Auctions_Update_Bids()
 			
 			getglobal(entry..i.."Price"):SetText(ORANGE .. CURRENT_BID .. ": " .. self:GetMoneyString(s.bidPrice) .. "\n"  
 					.. GREEN .. BUYOUT .. ": " ..  self:GetMoneyString(s.buyoutPrice))
-            getglobal(entry..i.."ItemIconTexture"):SetTexture(select(10, GetItemInfo(s.id)));
+            getglobal(entry..i.."ItemIconTexture"):SetTexture(select(9, GetItemInfo(s.id)));
 			if (s.count ~= nil) and (s.count > 1) then
 				getglobal(entry..i.."ItemCount"):SetText(s.count)
 				getglobal(entry..i.."ItemCount"):Show()

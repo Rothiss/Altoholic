@@ -15,7 +15,7 @@ function Altoholic:Skills_Update()
 	local VisibleLines = 14
 	local frame = "AltoSkills"
 	local entry = frame.."Entry"
-	local e = self:CreateEntryCache(entry, VisibleLines, "Collapse", "Name", "LevelNormalText", "Level", "Skill1NormalText", "Skill2NormalText", "CookingNormalText", "FirstAidNormalText", "FishingNormalText", "RidingNormalText")
+	local e = self:CreateEntryCache(entry, VisibleLines, "Collapse", "Name", "LevelNormalText", "Level", "Skill1NormalText", "Skill2NormalText", "CookingNormalText", "FirstAidNormalText", "FishingNormalText", "RidingNormalText", "SurvivalNormalText", "DisguiseNormalText")
 	local scrollFrame = getglobal(frame.."ScrollFrame")
 	if table.getn(self.CharacterInfo) == 0 then
 		self:ClearScrollFrame(scrollFrame, entry, VisibleLines, 18)
@@ -68,6 +68,8 @@ function Altoholic:Skills_Update()
 				e[i].FirstAidNormalText:SetText(WHITE .. BI["First Aid"])
 				e[i].FishingNormalText:SetText(WHITE .. BI["Fishing"])
 				e[i].RidingNormalText:SetText(WHITE .. L["Riding"])
+				e[i].SurvivalNormalText:SetText(WHITE .. L["Survival"])
+				e[i].DisguiseNormalText:SetText(WHITE .. L["Disguise"])
 				e[i].entry:SetID(line)
 				e[i].entry:Show()
 				i = i + 1
@@ -92,6 +94,8 @@ function Altoholic:Skills_Update()
 					e[i].FirstAidNormalText:SetText(self:GetSkillColor(s.firstaid) .. s.firstaid)
 					e[i].FishingNormalText:SetText(self:GetSkillColor(s.fishing) .. s.fishing)
 					e[i].RidingNormalText:SetText(self:GetSkillColor(s.riding) .. s.riding)
+					e[i].SurvivalNormalText:SetText(self:GetSkillColor(s.survival) .. s.survival)
+					e[i].DisguiseNormalText:SetText(self:GetSkillColor(s.disguise) .. s.disguise)
 				elseif (s.linetype == INFO_TOTAL_LINE) then
 					e[i].Collapse:Hide()
 					e[i].Name:SetText(L["Totals"])
@@ -108,6 +112,8 @@ function Altoholic:Skills_Update()
 					e[i].FirstAidNormalText:SetText("")
 					e[i].FishingNormalText:SetText("")
 					e[i].RidingNormalText:SetText("")
+					e[i].SurvivalNormalText:SetText("")
+					e[i].DisguiseNormalText:SetText("")
 				end
 				e[i].entry:SetID(line)
 				e[i].entry:Show()
@@ -154,8 +160,14 @@ function Altoholic_Skill_OnEnter(self)
 	elseif id == 6 then
 		skill = L["Riding"]
 		curRank, maxRank = Altoholic:GetSkillInfo( c.skill[L["Secondary Skills"]][L["Riding"]] )
+	elseif id == 8 then
+		skill = L["Survival"]
+		curRank, maxRank = Altoholic:GetSkillInfo( c.skill[L["Secondary Skills"]][L["Survival"]] )
+	elseif id == 9 then
+		skill = L["Disguise"]
+		curRank, maxRank = Altoholic:GetSkillInfo( c.skill[L["Secondary Skills"]][L["Disguise"]] )
 	end
-	if (id >= 1) and (id <= 6) then
+	if ((id >= 1) and (id <= 6)) or (id == 8) or (id == 9) then
 		rank = Altoholic:GetSkillColor(curRank) .. curRank .. "/" .. maxRank
 		suggestion = Altoholic:GetSuggestion(skill, curRank)
 	elseif id == 7 then	-- class

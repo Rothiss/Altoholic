@@ -44,7 +44,7 @@ function Altoholic:Containers_Update()
 				itemButton:SetID(itemIndex)
 				local itemTexture = getglobal(itemName .. "IconTexture")
 				if b.ids[itemIndex] ~= nil then
-                    itemTexture:SetTexture(select(10, GetItemInfo(b.ids[itemIndex])));
+                    itemTexture:SetTexture(select(9, GetItemInfo(b.ids[itemIndex])));
 				else
 					itemTexture:SetTexture("Interface\\PaperDoll\\UI-Backpack-EmptySlot");
 				end

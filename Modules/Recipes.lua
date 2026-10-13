@@ -87,7 +87,7 @@ function Altoholic:Recipes_Update()
 						local itemButton = getglobal(itemName);
 						itemButton:SetID(reagentID)
 						local itemTexture = getglobal(itemName .. "IconTexture")
-						itemTexture:SetTexture(select(10, GetItemInfo(reagentID)));
+						itemTexture:SetTexture(select(9, GetItemInfo(reagentID)));
 						itemTexture:SetWidth(18);
 						itemTexture:SetHeight(18);
 						itemTexture:SetAllPoints(itemButton);

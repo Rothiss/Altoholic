@@ -60,6 +60,11 @@ L:RegisterTranslations("zhTW", function() return {
 	["Poisons"] = "毒藥",
 	["Beast Training"] = "野獸訓練",
 	
+	-- OctoWoW / Turtle WoW custom professions
+	["Jewelcrafting"] = "珠寶設計",
+	["Survival"] = "Survival",
+	["Disguise"] = "偽裝術",
+	
 	--factions not in LibFactions or LibZone
 	["Exodar"] = "艾克索達",
 	["Gnomeregan Exiles"] = "諾姆瑞根流亡者",

@@ -28,7 +28,7 @@ function Altoholic:Search_Update()
 				hex = WHITE
 				getglobal(entry..i.."ItemIconTexture"):SetTexture("Interface\\Icons\\Trade_Engraving");
 			else
-				itemName, _, itemRarity, _, _, _, _, _, _, itemIcon = GetItemInfo(itemID)
+				itemName, _, itemRarity, _, _, _, _, _, itemIcon = GetItemInfo(itemID)
 				_, _, _, hex = GetItemQualityColor(itemRarity)
     			getglobal(entry..i.."ItemIconTexture"):SetTexture(itemIcon);
 			end

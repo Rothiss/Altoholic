@@ -1,6 +1,15 @@
 ****************************************************************************************************
 *	Altaholic for Vanilla WoW: Change Log							   *
 ****************************************************************************************************
+	v1.1.0
+	- Added support for OctoWoW / Turtle WoW custom professions (Jewelcrafting, Survival, Disguise):
+	  displayed on the Skills screen, browsable in the Recipes menu, searchable and with leveling
+	  suggestions. Custom-content clients are detected automatically; other clients are unchanged.
+
+	- Fixed item icons (Containers, Equipment, Auctions, Search, recipe reagents): the icon is the
+	  9th return value of GetItemInfo on 1.12 clients, not the 10th.
+
+****************************************************************************************************
 	v1.0.9
 	- RightClick menus fixed - root cause: renamed frames from previous release
 
@@ -34,19 +43,19 @@
 ****************************************************************************************************
 	v1.0.5
 	- Added ChatLink support. Questlinks will inform you which Alts have the quest. Itemlinks
-	  will inform you where the item is dropped if it’s gear. If it’s a consumable or any other
+	  will inform you where the item is dropped if itï¿½s gear. If itï¿½s a consumable or any other
 	  type of item you can use it will tell you how many you have and which Alts have them. In
-	  some cases, it will tell you if an item is a crafted item. “Item Source” can be toggled
+	  some cases, it will tell you if an item is a crafted item. ï¿½Item Sourceï¿½ can be toggled
 	  on/off in the Options panel.
 
-	- Speaking of “…how many you have…”. Item counts! Yes, hover over a piece of Wool, a
+	- Speaking of ï¿½ï¿½how many you haveï¿½ï¿½. Item counts! Yes, hover over a piece of Wool, a
 	  Bandage, or a healing potion etc. The tooltip will inform you which Alts have it, how
-	  much, and tell you if it’s in the Alt’s bank or bags. “Item Source, Item Count Per
-	  Character, and Total Item Count” can be toggled on/off in the Options panel.
+	  much, and tell you if itï¿½s in the Altï¿½s bank or bags. ï¿½Item Source, Item Count Per
+	  Character, and Total Item Countï¿½ can be toggled on/off in the Options panel.
 
-	- Options… both “Already Known” and “Learnable By…” were at one point combined into one
+	- Optionsï¿½ both ï¿½Already Knownï¿½ and ï¿½Learnable Byï¿½ï¿½ were at one point combined into one
 	  on/off switch. Now, they are separated and can be toggled separately. By default,
-	  “Include Already Known” is off and “Include Learnable By” is on. Makes for a cleaner
+	  ï¿½Include Already Knownï¿½ is off and ï¿½Include Learnable Byï¿½ is on. Makes for a cleaner
 	  tooltip as there is already a flood of info going to it.
 
 	- All tooltips are now processed not just inside Altaholic but now outside and information
@@ -65,11 +74,11 @@
 	- Fixed a memory leak. I found a few more functions with bugs in them that was inserting [0]
 	  keys into tables and then polluting the Saved Variables file which can cause other
 	  functions to not find what they are looking for. These were also not getting cleared
-	  properly which caused all the cache tables to grow over time. I’ve also inserted some
+	  properly which caused all the cache tables to grow over time. Iï¿½ve also inserted some
 	  code that will scrub for [0] keys incase I missed some sub-routines.
 
 	- Tooltips will now notify the player when and which characters trade skill database is
-	  empty. It’s also now smart enough to know if a character has a particular trade skill.
+	  empty. Itï¿½s also now smart enough to know if a character has a particular trade skill.
 ****************************************************************************************************
 	v1.0.2
 	- Narrowed the the tooltip checker to only include the mailbox, auction house and bag

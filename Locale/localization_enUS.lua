@@ -58,6 +58,11 @@ L:RegisterTranslations("enUS", function() return {
 	["Poisons"] = true,
 	["Beast Training"] = true,
 	
+	-- OctoWoW / Turtle WoW custom professions
+	["Jewelcrafting"] = true,
+	["Survival"] = true,
+	["Disguise"] = true,
+	
 	--factions not in LibFactions or LibZone
 	["Exodar"] = true,
 	["Gnomeregan Exiles"] = true,
