@@ -13,17 +13,19 @@ function Altoholic:AccountSummary_Update()
 	local VisibleLines = 14
 	local frame = "AltoSummary"
 	local entry = frame.."Entry"
+	local e = self:CreateEntryCache(entry, VisibleLines, "Collapse", "Name", "LevelNormalText", "Level", "Talents", "Money", "Played", "Rested")
+	local scrollFrame = getglobal(frame.."ScrollFrame")
 	if table.getn(self.CharacterInfo) == 0 then
-		self:ClearScrollFrame(getglobal(frame.."ScrollFrame"), entry, VisibleLines, 18)
+		self:ClearScrollFrame(scrollFrame, entry, VisibleLines, 18)
 		return
 	end
-	local offset = FauxScrollFrame_GetOffset(getglobal(frame.."ScrollFrame"));
+	local offset = FauxScrollFrame_GetOffset(scrollFrame);
 	local DisplayedCount = 0
 	local VisibleCount = 0
 	local DrawRealm
 	local CurrentFaction, CurrentRealm
 	local i=1
-	for line, s in pairs(self.CharacterInfo) do
+	for line, s in ipairs(self.CharacterInfo) do
 		if (offset > 0) or (DisplayedCount >= VisibleLines) then		-- if the line will not be visible
 			if s.linetype == INFO_REALM_LINE then								-- then keep track of counters
 				CurrentFaction = s.faction
@@ -44,24 +46,24 @@ function Altoholic:AccountSummary_Update()
 				CurrentFaction = s.faction
 				CurrentRealm = s.realm
 				if s.isCollapsed == false then
-					getglobal(entry..i.."Collapse"):SetNormalTexture("Interface\\Buttons\\UI-MinusButton-Up"); 
+					e[i].Collapse:SetNormalTexture("Interface\\Buttons\\UI-MinusButton-Up"); 
 					DrawRealm = true
 				else
-					getglobal(entry..i.."Collapse"):SetNormalTexture("Interface\\Buttons\\UI-PlusButton-Up");
+					e[i].Collapse:SetNormalTexture("Interface\\Buttons\\UI-PlusButton-Up");
 					DrawRealm = false
 				end
-				getglobal(entry..i.."Collapse"):Show()
-				getglobal(entry..i.."Name"):SetText(self:GetFullRealmString(s.faction, s.realm))
-				getglobal(entry..i.."Name"):SetJustifyH("LEFT")
-				getglobal(entry..i.."Name"):SetPoint("TOPLEFT", 25, 0)
-				getglobal(entry..i.."Name"):SetWidth(210)
-				getglobal(entry..i.."LevelNormalText"):SetText("")
-				getglobal(entry..i.."Talents"):SetText("")
-				getglobal(entry..i.."Money"):SetText("")
-				getglobal(entry..i.."Played"):SetText("")
-				getglobal(entry..i.."Rested"):SetText("")
-				getglobal(entry..i):SetID(line)
-				getglobal(entry..i):Show()
+				e[i].Collapse:Show()
+				e[i].Name:SetText(self:GetFullRealmString(s.faction, s.realm))
+				e[i].Name:SetJustifyH("LEFT")
+				e[i].Name:SetPoint("TOPLEFT", 25, 0)
+				e[i].Name:SetWidth(210)
+				e[i].LevelNormalText:SetText("")
+				e[i].Talents:SetText("")
+				e[i].Money:SetText("")
+				e[i].Played:SetText("")
+				e[i].Rested:SetText("")
+				e[i].entry:SetID(line)
+				e[i].entry:Show()
 				i = i + 1
 				VisibleCount = VisibleCount + 1
 				DisplayedCount = DisplayedCount + 1
@@ -69,39 +71,39 @@ function Altoholic:AccountSummary_Update()
 				if (s.linetype == INFO_CHARACTER_LINE) then
 					local c = self.db.account.data[CurrentFaction][CurrentRealm].char[s.name]
 					local color = self:GetClassColor(c.class)
-					getglobal(entry..i.."Collapse"):Hide()
-					getglobal(entry..i.."Name"):SetText(color .. s.name)
-					getglobal(entry..i.."Name"):SetJustifyH("RIGHT")
-					getglobal(entry..i.."Name"):SetPoint("TOPLEFT", 15, 0)
-					getglobal(entry..i.."Name"):SetWidth(70)
-					getglobal(entry..i.."LevelNormalText"):SetText(color .. "Lv |cFF00FF00" .. c.level .. color .. " " .. c.race .. " " .. c.class)
-					getglobal(entry..i.."LevelNormalText"):SetJustifyH("LEFT")
-					getglobal(entry..i.."Talents"):SetText(c.talent)
-					getglobal(entry..i.."Money"):SetText(self:GetMoneyString(c.money))
-					getglobal(entry..i.."Played"):SetText(self:GetTimeString(c.played))
+					e[i].Collapse:Hide()
+					e[i].Name:SetText(color .. s.name)
+					e[i].Name:SetJustifyH("RIGHT")
+					e[i].Name:SetPoint("TOPLEFT", 15, 0)
+					e[i].Name:SetWidth(70)
+					e[i].LevelNormalText:SetText(color .. "Lv |cFF00FF00" .. c.level .. color .. " " .. c.race .. " " .. c.class)
+					e[i].LevelNormalText:SetJustifyH("LEFT")
+					e[i].Talents:SetText(c.talent)
+					e[i].Money:SetText(self:GetMoneyString(c.money))
+					e[i].Played:SetText(self:GetTimeString(c.played))
 					local restXP
 					if s.name == V.player then
 						restXP = self:GetRestedXP(c.level, c.restxp, 0, c.isResting)
 					else
 						restXP = self:GetRestedXP(c.level, c.restxp, c.lastlogout, c.isResting)
 					end
-					getglobal(entry..i.."Rested"):SetText(restXP)
+					e[i].Rested:SetText(restXP)
 				elseif (s.linetype == INFO_TOTAL_LINE) then
-					getglobal(entry..i.."Collapse"):Hide()
-					getglobal(entry..i.."Name"):SetText(L["Totals"])
-					getglobal(entry..i.."Name"):SetJustifyH("LEFT")
-					getglobal(entry..i.."Name"):SetPoint("TOPLEFT", 15, 0)
-					getglobal(entry..i.."Name"):SetWidth(70)
-					getglobal(entry..i.."LevelNormalText"):SetText(s.level)
-					getglobal(entry..i.."LevelNormalText"):SetJustifyH("RIGHT")
-					getglobal(entry..i.."Talents"):SetText("")
-					getglobal(entry..i.."Money"):SetText(s.money)
-					getglobal(entry..i.."Money"):SetTextColor(1.0, 1.0, 1.0)
-					getglobal(entry..i.."Played"):SetText(s.played)
-					getglobal(entry..i.."Rested"):SetText("")
+					e[i].Collapse:Hide()
+					e[i].Name:SetText(L["Totals"])
+					e[i].Name:SetJustifyH("LEFT")
+					e[i].Name:SetPoint("TOPLEFT", 15, 0)
+					e[i].Name:SetWidth(70)
+					e[i].LevelNormalText:SetText(s.level)
+					e[i].LevelNormalText:SetJustifyH("RIGHT")
+					e[i].Talents:SetText("")
+					e[i].Money:SetText(s.money)
+					e[i].Money:SetTextColor(1.0, 1.0, 1.0)
+					e[i].Played:SetText(s.played)
+					e[i].Rested:SetText("")
 				end
-				getglobal(entry..i):SetID(line)
-				getglobal(entry..i):Show()
+				e[i].entry:SetID(line)
+				e[i].entry:Show()
 				i = i + 1
 				VisibleCount = VisibleCount + 1
 				DisplayedCount = DisplayedCount + 1
@@ -109,11 +111,11 @@ function Altoholic:AccountSummary_Update()
 		end
 	end
 	while i <= VisibleLines do
-		getglobal(entry..i):SetID(0)
-		getglobal(entry..i):Hide()
+		e[i].entry:SetID(0)
+		e[i].entry:Hide()
 		i = i + 1
 	end
-	FauxScrollFrame_Update(getglobal(frame.."ScrollFrame"), VisibleCount, VisibleLines, 18);
+	FauxScrollFrame_Update(scrollFrame, VisibleCount, VisibleLines, 18);
 end
 
 function Altoholic_AccountSummaryLevel_OnEnter(self)

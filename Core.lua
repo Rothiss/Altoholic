@@ -7,11 +7,12 @@ Altoholic.BagIndices = {}
 Altoholic.MenuCache = {}
 Altoholic.vars = {}
 Altoholic.vars.version = "v1.0.9"
-local G = AceLibrary("Gratuity-2.0")
 local L = AceLibrary("AceLocale-2.2"):new("Altoholic")
 local V = Altoholic.vars
 local BF = LibStub("LibBabble-Faction-3.0"):GetLookupTable()
 local BZ = LibStub("LibBabble-Zone-3.0"):GetLookupTable()
+
+local splitPatterns = {}
 
 
 local options = { 
@@ -700,10 +701,14 @@ function Altoholic:CmdSearchBags(word1, word2)
 end
 
 function Altoholic:strsplit(delimiter, subject)
-  local delimiter, fields = delimiter or ":", {}
-  local pattern = string.format("([^%s]+)", delimiter)
-  string.gsub(subject, pattern, function(c) fields[table.getn(fields)+1] = c end)
-  return unpack(fields)
+	local delimiter, fields = delimiter or ":", {}
+	local pattern = splitPatterns[delimiter]
+	if pattern == nil then
+		pattern = string.format("([^%s]+)", delimiter)
+		splitPatterns[delimiter] = pattern
+	end
+	string.gsub(subject, pattern, function(c) fields[table.getn(fields)+1] = c end)
+	return unpack(fields)
 end
 
 Altoholic_UIDropDownMenu_CreateInfo = Altoholic_UIDropDownMenu_CreateInfo or loadstring("local t = {} return function() for k in pairs(t) do t[k] = nil t[k] = {} end return t end")()

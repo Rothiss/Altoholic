@@ -5,15 +5,17 @@ function Altoholic:Containers_Update()
 	local VisibleLines = 7
 	local frame = "AltoContainers"
 	local entry = frame.."Entry"
-	if table.getn(self.BagIndices) == 0 then
-		self:ClearScrollFrame(getglobal(frame.."ScrollFrame"), entry, VisibleLines, 41)
+	local scrollFrame = getglobal(frame.."ScrollFrame")
+	local numIndices = table.getn(self.BagIndices)
+	if numIndices == 0 then
+		self:ClearScrollFrame(scrollFrame, entry, VisibleLines, 41)
 		return
 	else
 		getglobal("AltoholicFrame_Status"):SetText("|cFFFFD700" .. V.CurrentAlt .. " of ".. V.CurrentRealm .. " |cFFFFFFFF" .. L["Containers"])
 		getglobal("AltoholicFrame_Status"):Show()
 	end
 	local c = self.db.account.data[V.CurrentFaction][V.CurrentRealm].char[V.CurrentAlt]
-	local offset = FauxScrollFrame_GetOffset(getglobal(frame.."ScrollFrame"));
+	local offset = FauxScrollFrame_GetOffset(scrollFrame);
 	for i=1, VisibleLines do
 		local line = i + offset
 		local b = c.bag["Bag" .. self.BagIndices[line].bagID]
@@ -42,8 +44,7 @@ function Altoholic:Containers_Update()
 				itemButton:SetID(itemIndex)
 				local itemTexture = getglobal(itemName .. "IconTexture")
 				if b.ids[itemIndex] ~= nil then
-                    local _, _, _, _, _, _, _, _, itemTextureIcon = GetItemInfo(b.ids[itemIndex]); 
-					itemTexture:SetTexture(itemTextureIcon);
+                    itemTexture:SetTexture(select(10, GetItemInfo(b.ids[itemIndex])));
 				else
 					itemTexture:SetTexture("Interface\\PaperDoll\\UI-Backpack-EmptySlot");
 				end
@@ -66,10 +67,10 @@ function Altoholic:Containers_Update()
 		getglobal(entry..i):Show()
 		getglobal(entry..i):SetID(self.BagIndices[line].bagID)
 	end
-	if table.getn(self.BagIndices) < VisibleLines then
-		FauxScrollFrame_Update(getglobal(frame.."ScrollFrame"), VisibleLines, VisibleLines, 41);
+	if numIndices < VisibleLines then
+		FauxScrollFrame_Update(scrollFrame, VisibleLines, VisibleLines, 41);
 	else
-		FauxScrollFrame_Update(getglobal(frame.."ScrollFrame"), table.getn(self.BagIndices), VisibleLines, 41);
+		FauxScrollFrame_Update(scrollFrame, numIndices, VisibleLines, 41);
 	end	
 end	
 

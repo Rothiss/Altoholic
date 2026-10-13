@@ -57,8 +57,7 @@ function Altoholic:Equipment_Update()
 			local itemID = c.inventory[line]
 			if itemID ~= nil then
 				itemButton.CharName = CharacterName
-                local _, _, _, _, _, _, _, _, itexture = GetItemInfo(itemID)
-				itemTexture:SetTexture(itexture);
+                itemTexture:SetTexture(select(10, GetItemInfo(itemID)));
 			else
 				itemButton.CharName = nil
 				itemTexture:SetTexture(self.equipment[line].icon);

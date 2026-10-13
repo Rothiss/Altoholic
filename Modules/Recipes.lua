@@ -3,6 +3,22 @@ local L = AceLibrary("AceLocale-2.2"):new("Altoholic")
 local V = Altoholic.vars
 local TEAL		= "|cFF00FF9A"
 
+function Altoholic:GetRecipeReagents(s)
+	local reagentList = s.reagentList
+	if not reagentList then		-- fallback for data scanned by older versions (packed "id:count|id:count" string)
+		reagentList = {}
+		if s.reagents then
+			local parts = { self:strsplit("|", s.reagents) }
+			for _, pair in ipairs(parts) do
+				local id, count = self:strsplit(":", pair)
+				table.insert(reagentList, { id = tonumber(id), count = tonumber(count) })
+			end
+		end
+		s.reagentList = reagentList
+	end
+	return reagentList
+end
+
 function Altoholic:Recipes_Update()
 	local c = self.db.account.data[V.CurrentFaction][V.CurrentRealm].char[V.CurrentAlt]		-- current alt
 	local VisibleLines = 14
@@ -22,7 +38,7 @@ function Altoholic:Recipes_Update()
 	local VisibleCount = 0
 	local DrawGroup = true
 	local i=1
-    for line, s in pairs(c.recipes[V.CurrentProfession].list) do
+    for line, s in ipairs(c.recipes[V.CurrentProfession].list) do
 		if (offset > 0) or (DisplayedCount >= VisibleLines) then		-- if the line will not be visible
 			if s.isHeader then													-- then keep track of counters
 				if s.isCollapsed == false then
@@ -62,50 +78,21 @@ function Altoholic:Recipes_Update()
 				getglobal(entry..i.."RecipeLinkNormalText"):SetText(s.link)
 				getglobal(entry..i.."RecipeLink"):SetID(line)
 				getglobal(entry..i.."RecipeLink"):SetPoint("TOPLEFT", 15, 0)
-                local numReagents = s.numReagents
+				local reagentList = self:GetRecipeReagents(s)
 				for j=1, 8 do
 					local itemName = entry..i .. "Item" .. j;
-                    local _, _, first, second, third, fourth, fifth, sixth, seventh, eighth = string.find(s.reagents, "(%d+:%d+)|(%d+:%d+)|(%d+:%d+)|(%d+:%d+)|(%d+:%d+)|(%d+:%d+)|(%d+:%d+)|(%d+:%d+)")
-                    local _, _, first, second, third, fourth, fifth, sixth, seventh = string.find(s.reagents, "(%d+:%d+)|(%d+:%d+)|(%d+:%d+)|(%d+:%d+)|(%d+:%d+)|(%d+:%d+)|(%d+:%d+)")
-                    local _, _, first, second, third, fourth, fifth, sixth = string.find(s.reagents, "(%d+:%d+)|(%d+:%d+)|(%d+:%d+)|(%d+:%d+)|(%d+:%d+)|(%d+:%d+)")
-                    local _, _, first, second, third, fourth, fifth = string.find(s.reagents, "(%d+:%d+)|(%d+:%d+)|(%d+:%d+)|(%d+:%d+)|(%d+:%d+)")
-                    local _, _, first, second, third, fourth = string.find(s.reagents, "(%d+:%d+)|(%d+:%d+)|(%d+:%d+)|(%d+:%d+)")
-                    local _, _, first, second, third = string.find(s.reagents, "(%d+:%d+)|(%d+:%d+)|(%d+:%d+)")
-                    local _, _, first, second = string.find(s.reagents, "(%d+:%d+)|(%d+:%d+)")
-                    local _, _, first = string.find(s.reagents, "(%d+:%d+)")
-                    if eighth ~= nil and j == 8 then
-                        reagent = eighth
-                    elseif seventh ~= nil and j == 7 then
-                        reagent = seventh
-                    elseif sixth ~= nil and j == 6 then
-                        reagent = sixth
-                    elseif fifth ~= nil and j == 5 then
-                        reagent = fifth
-                    elseif fourth ~= nil and j == 4 then
-                        reagent = fourth
-                    elseif third ~= nil and j == 3 then
-                        reagent = third
-                    elseif second ~= nil and j == 2 then
-                        reagent = second
-                    elseif first ~= nil and j == 1 then
-                        reagent = first
-                    else
-                        reagent = nil
-                    end
+					local reagent = reagentList[j]
 					if reagent then
-                        local _, _, reagentID, reagentCount = string.find(reagent, "(%d+):(%d+)")
-                        reagentID = tonumber(reagentID)
-						reagentCount = tonumber(reagentCount)
+						local reagentID = reagent.id
 						local itemButton = getglobal(itemName);
 						itemButton:SetID(reagentID)
 						local itemTexture = getglobal(itemName .. "IconTexture")
-                        local _, _, _, _, _, _, _, _, itexture  = GetItemInfo(reagentID)
-						itemTexture:SetTexture(itexture);
+						itemTexture:SetTexture(select(10, GetItemInfo(reagentID)));
 						itemTexture:SetWidth(18);
 						itemTexture:SetHeight(18);
 						itemTexture:SetAllPoints(itemButton);
 						local itemCount = getglobal(itemName .. "Count")
-						itemCount:SetText(reagentCount);
+						itemCount:SetText(reagent.count);
 						itemCount:Show();
 						getglobal(itemName):Show()
 					else

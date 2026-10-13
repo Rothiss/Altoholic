@@ -38,12 +38,13 @@ function Altoholic:Reputations_Update()
 	getglobal(entry .. "1"):Show()
 	getglobal(entry .. "1"):SetID(0)
 	-- ** draw factions **
-	local offset = FauxScrollFrame_GetOffset(getglobal(frame.."ScrollFrame"));
+	local scrollFrame = getglobal(frame.."ScrollFrame")
+	local offset = FauxScrollFrame_GetOffset(scrollFrame);
 	local DisplayedCount = 0
 	local VisibleCount = 0
 	local DrawFactionGroup
 	i=1
-	for line, s in pairs(V.Factions) do
+	for line, s in ipairs(V.Factions) do
 		if (offset > 0) or (DisplayedCount >= VisibleLines) then		-- if the line will not be visible
 			if type(s) == "table" then								-- then keep track of counters
 				if s.isCollapsed == false then
@@ -134,7 +135,7 @@ function Altoholic:Reputations_Update()
 		getglobal(entry..i):Hide()
 		i = i + 1
 	end
-	FauxScrollFrame_Update(getglobal(frame.."ScrollFrame"), VisibleCount, VisibleLines, 41);
+	FauxScrollFrame_Update(scrollFrame, VisibleCount, VisibleLines, 41);
 end
 
 function Altoholic_Reputations_OnEnter()

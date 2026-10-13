@@ -12,23 +12,25 @@ function Altoholic:Auctions_Update_Auctions()
 	local VisibleLines = 7
 	local frame = "AltoAuctions"
 	local entry = frame.."Entry"
+	local scrollFrame = getglobal(frame.."ScrollFrame")
 	
-	if table.getn(c.auctions) == 0 then
+	local numItems = table.getn(c.auctions)
+	if numItems == 0 then
 		getglobal("AltoholicFrame_Status"):SetText("|cFFFFD700" .. V.CurrentAlt .. " of ".. V.CurrentRealm .. " |cFFFFFFFF" .. L[" has no auctions"])
 		getglobal("AltoholicFrame_Status"):Show()
 		
-		self:ClearScrollFrame(getglobal(frame.."ScrollFrame"), entry, VisibleLines, 41)
+		self:ClearScrollFrame(scrollFrame, entry, VisibleLines, 41)
 		return
 	else
    		getglobal("AltoholicFrame_Status"):SetText("|cFFFFD700" .. V.CurrentAlt .. " of ".. V.CurrentRealm .. " |cFFFFFFFF: " .. L["last check "] .. self:GetDelayInDays(c.lastAHcheck).. L[" days ago"])
 		getglobal("AltoholicFrame_Status"):Show()
 	end
 
-	local offset = FauxScrollFrame_GetOffset(getglobal(frame.."ScrollFrame"));
+	local offset = FauxScrollFrame_GetOffset(scrollFrame);
 	
 	for i=1, VisibleLines do
 		local line = i + offset
-		if line <= table.getn(c.auctions) then
+		if line <= numItems then
 			local s = c.auctions[line]
 			
 			local itemName, _, itemRarity = GetItemInfo(s.id)
@@ -54,8 +56,7 @@ function Altoholic:Auctions_Update_Auctions()
 			
 			getglobal(entry..i.."Price"):SetText(self:GetMoneyString(s.startPrice) .. "\n"  
 					.. GREEN .. BUYOUT .. ": " ..  self:GetMoneyString(s.buyoutPrice))
-            local _, _, _, _, _, _, _, _, itexture  = GetItemInfo(s.id)
-			getglobal(entry..i.."ItemIconTexture"):SetTexture(itexture);
+            getglobal(entry..i.."ItemIconTexture"):SetTexture(select(10, GetItemInfo(s.id)));
 			if (s.count ~= nil) and (s.count > 1) then
 				getglobal(entry..i.."ItemCount"):SetText(s.count)
 				getglobal(entry..i.."ItemCount"):Show()
@@ -70,10 +71,10 @@ function Altoholic:Auctions_Update_Auctions()
 		end
 	end
 	
-	if table.getn(c.auctions) < VisibleLines then
-		FauxScrollFrame_Update(getglobal(frame.."ScrollFrame"), VisibleLines, VisibleLines, 41);
+	if numItems < VisibleLines then
+		FauxScrollFrame_Update(scrollFrame, VisibleLines, VisibleLines, 41);
 	else
-		FauxScrollFrame_Update(getglobal(frame.."ScrollFrame"), table.getn(c.auctions), VisibleLines, 41);
+		FauxScrollFrame_Update(scrollFrame, numItems, VisibleLines, 41);
 	end
 end
 
@@ -82,23 +83,25 @@ function Altoholic:Auctions_Update_Bids()
 	local VisibleLines = 7
 	local frame = "AltoAuctions"
 	local entry = frame.."Entry"
+	local scrollFrame = getglobal(frame.."ScrollFrame")
 	
-	if table.getn(c.bids) == 0 then
+	local numItems = table.getn(c.bids)
+	if numItems == 0 then
 		getglobal("AltoholicFrame_Status"):SetText("|cFFFFD700" .. V.CurrentAlt .. " of ".. V.CurrentRealm .. " |cFFFFFFFF" .. L[" has no bids"])
 		getglobal("AltoholicFrame_Status"):Show()
 		
-		self:ClearScrollFrame(getglobal(frame.."ScrollFrame"), entry, VisibleLines, 41)
+		self:ClearScrollFrame(scrollFrame, entry, VisibleLines, 41)
 		return
 	else
 		getglobal("AltoholicFrame_Status"):SetText("|cFFFFD700" .. V.CurrentAlt .. " of ".. V.CurrentRealm .. " |cFFFFFFFF" .. BIDS .. ": " .. L["last check "] .. self:GetDelayInDays(c.lastAHcheck).. L[" days ago"])
 		getglobal("AltoholicFrame_Status"):Show()
 	end
 
-	local offset = FauxScrollFrame_GetOffset(getglobal(frame.."ScrollFrame"));
+	local offset = FauxScrollFrame_GetOffset(scrollFrame);
 	
 	for i=1, VisibleLines do
 		local line = i + offset
-		if line <= table.getn(c.bids) then
+		if line <= numItems then
 			local s = c.bids[line]
 			
 			local itemName, _, itemRarity = GetItemInfo(s.id)
@@ -116,8 +119,7 @@ function Altoholic:Auctions_Update_Bids()
 			
 			getglobal(entry..i.."Price"):SetText(ORANGE .. CURRENT_BID .. ": " .. self:GetMoneyString(s.bidPrice) .. "\n"  
 					.. GREEN .. BUYOUT .. ": " ..  self:GetMoneyString(s.buyoutPrice))
-            local _, _, _, _, _, _, _, _, itexture  = GetItemInfo(s.id)
-			getglobal(entry..i.."ItemIconTexture"):SetTexture(itexture);
+            getglobal(entry..i.."ItemIconTexture"):SetTexture(select(10, GetItemInfo(s.id)));
 			if (s.count ~= nil) and (s.count > 1) then
 				getglobal(entry..i.."ItemCount"):SetText(s.count)
 				getglobal(entry..i.."ItemCount"):Show()
@@ -132,10 +134,10 @@ function Altoholic:Auctions_Update_Bids()
 		end
 	end
 	
-	if table.getn(c.bids) < VisibleLines then
-		FauxScrollFrame_Update(getglobal(frame.."ScrollFrame"), VisibleLines, VisibleLines, 41);
+	if numItems < VisibleLines then
+		FauxScrollFrame_Update(scrollFrame, VisibleLines, VisibleLines, 41);
 	else
-		FauxScrollFrame_Update(getglobal(frame.."ScrollFrame"), table.getn(c.bids), VisibleLines, 41);
+		FauxScrollFrame_Update(scrollFrame, numItems, VisibleLines, 41);
 	end
 end
 

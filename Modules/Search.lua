@@ -11,11 +11,13 @@ function Altoholic:Search_Update()
 	local VisibleLines = 7
 	local frame = "AltoSearch"
 	local entry = frame.."Entry"
-	if table.getn(self.SearchResults) == 0 then
-		self:ClearScrollFrame(getglobal(frame.."ScrollFrame"), entry, VisibleLines, 41)
+	local scrollFrame = getglobal(frame.."ScrollFrame")
+	local numResults = table.getn(self.SearchResults)
+	if numResults == 0 then
+		self:ClearScrollFrame(scrollFrame, entry, VisibleLines, 41)
 		return
 	end
-	local offset = FauxScrollFrame_GetOffset(getglobal(frame.."ScrollFrame"));
+	local offset = FauxScrollFrame_GetOffset(scrollFrame);
 	for i=1, VisibleLines do
 		local line = i + offset
 		local s = self.SearchResults[line]
@@ -26,7 +28,7 @@ function Altoholic:Search_Update()
 				hex = WHITE
 				getglobal(entry..i.."ItemIconTexture"):SetTexture("Interface\\Icons\\Trade_Engraving");
 			else
-				itemName, _, itemRarity, _, _, _, _, _, itemIcon = GetItemInfo(itemID)
+				itemName, _, itemRarity, _, _, _, _, _, _, itemIcon = GetItemInfo(itemID)
 				_, _, _, hex = GetItemQualityColor(itemRarity)
     			getglobal(entry..i.."ItemIconTexture"):SetTexture(itemIcon);
 			end
@@ -57,16 +59,16 @@ function Altoholic:Search_Update()
 			getglobal(entry..i):Hide()
 		end
 	end
-	if (offset+VisibleLines) <= table.getn(self.SearchResults) then
-		getglobal("AltoholicFrame_Status"):SetText(table.getn(self.SearchResults) .. L[" results found (Showing "] .. (offset+1) .. "-" .. (offset+VisibleLines) .. ")")
+	if (offset+VisibleLines) <= numResults then
+		getglobal("AltoholicFrame_Status"):SetText(numResults .. L[" results found (Showing "] .. (offset+1) .. "-" .. (offset+VisibleLines) .. ")")
 	else
-		getglobal("AltoholicFrame_Status"):SetText(table.getn(self.SearchResults) .. L[" results found (Showing "] .. (offset+1) .. "-" .. table.getn(self.SearchResults) .. ")")
+		getglobal("AltoholicFrame_Status"):SetText(numResults .. L[" results found (Showing "] .. (offset+1) .. "-" .. numResults .. ")")
 	end
 	getglobal("AltoholicFrame_Status"):Show()
-	if table.getn(self.SearchResults) < VisibleLines then
-		FauxScrollFrame_Update(getglobal(frame.."ScrollFrame"), VisibleLines, VisibleLines, 41);
+	if numResults < VisibleLines then
+		FauxScrollFrame_Update(scrollFrame, VisibleLines, VisibleLines, 41);
 	else
-		FauxScrollFrame_Update(getglobal(frame.."ScrollFrame"), table.getn(self.SearchResults), VisibleLines, 41);
+		FauxScrollFrame_Update(scrollFrame, numResults, VisibleLines, 41);
 	end
 end
 

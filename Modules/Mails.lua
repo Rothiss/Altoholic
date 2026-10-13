@@ -7,6 +7,7 @@ function Altoholic:Mail_Update()
 	local VisibleLines = 7
 	local frame = "AltoMail"
 	local entry = frame.."Entry"
+	local scrollFrame = getglobal(frame.."ScrollFrame")
 	if table.getn(c.mail) == 0 then
 		if c.lastmailcheck == 0 then
 			getglobal("AltoholicFrame_Status"):SetText("|cFFFFD700" .. V.CurrentAlt .. " of ".. V.CurrentRealm .. " |cFFFFFFFF" .. L[" has not visited his/her mailbox yet"])
@@ -15,16 +16,17 @@ function Altoholic:Mail_Update()
 		end
 		getglobal("AltoholicFrame_Status"):Show()
 		
-		self:ClearScrollFrame(getglobal(frame.."ScrollFrame"), entry, VisibleLines, 41)
+		self:ClearScrollFrame(scrollFrame, entry, VisibleLines, 41)
 		return
 	else
 		getglobal("AltoholicFrame_Status"):SetText("|cFFFFD700" .. V.CurrentAlt .. " of ".. V.CurrentRealm .. " |cFFFFFFFF" .. L["Mailbox"])
 		getglobal("AltoholicFrame_Status"):Show()
 	end
-	local offset = FauxScrollFrame_GetOffset(getglobal(frame.."ScrollFrame"));
+	local offset = FauxScrollFrame_GetOffset(scrollFrame);
+	local numMail = table.getn(c.mail)
 	for i=1, VisibleLines do
 		local line = i + offset
-		if line <= table.getn(c.mail) then
+		if line <= numMail then
 			local s = c.mail[line]
 			getglobal(entry..i.."Name"):SetText(s.subject)
 			getglobal(entry..i.."Character"):SetText(s.sender)
@@ -44,10 +46,10 @@ function Altoholic:Mail_Update()
 	end
 	getglobal("AltoholicFrame_Status"):SetText(L["Mail was last checked "] .. self:GetDelayInDays(c.lastmailcheck).. L[" days ago"])
 	getglobal("AltoholicFrame_Status"):Show()
-	if table.getn(c.mail) < VisibleLines then
-		FauxScrollFrame_Update(getglobal(frame.."ScrollFrame"), VisibleLines, VisibleLines, 41);
+	if numMail < VisibleLines then
+		FauxScrollFrame_Update(scrollFrame, VisibleLines, VisibleLines, 41);
 	else
-		FauxScrollFrame_Update(getglobal(frame.."ScrollFrame"), table.getn(c.mail), VisibleLines, 41);
+		FauxScrollFrame_Update(scrollFrame, numMail, VisibleLines, 41);
 	end
 end
 
@@ -204,6 +206,7 @@ function SendMail(recipient, subject, body)
         end
     end
     V.Attachments = {}
+    V.ItemCountIndex = nil
     Orig_SendMail(recipient, subject, body)
 end
 
@@ -228,6 +231,7 @@ function Altoholic:MAIL_CLOSED()
 		self:UpdatePlayerBags()
 		self:UnregisterEvent("MAIL_INBOX_UPDATE");
 		self:UnregisterEvent("MAIL_SEND_INFO_UPDATE");
+		V.ItemCountIndex = nil
 	else
 		V.mailclose = nil
 	end

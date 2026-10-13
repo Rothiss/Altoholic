@@ -10,21 +10,22 @@ function Altoholic:Quests_Update()
 	local VisibleLines = 14
 	local frame = "AltoQuests"
 	local entry = frame.."Entry"
+	local scrollFrame = getglobal(frame.."ScrollFrame")
 	if table.getn(c.questlog) == 0 then
 		getglobal("AltoholicFrame_Status"):SetText("|cFFFFD700" .. V.CurrentAlt .. " of ".. V.CurrentRealm .. " |cFFFFFFFF" .. "No quests found")
 		getglobal("AltoholicFrame_Status"):Show()
-		self:ClearScrollFrame(getglobal(frame.."ScrollFrame"), entry, VisibleLines, 18)
+		self:ClearScrollFrame(scrollFrame, entry, VisibleLines, 18)
 		return
 	else
 		getglobal("AltoholicFrame_Status"):SetText("|cFFFFD700" .. V.CurrentAlt .. " of ".. V.CurrentRealm .. " |cFFFFFFFF" .. QUEST_LOG)
 		getglobal("AltoholicFrame_Status"):Show()
 	end
-	local offset = FauxScrollFrame_GetOffset(getglobal(frame.."ScrollFrame"));
+	local offset = FauxScrollFrame_GetOffset(scrollFrame);
 	local DisplayedCount = 0
 	local VisibleCount = 0
 	local DrawGroup
 	local i=1
-	for line, s in pairs(c.questlog) do
+	for line, s in ipairs(c.questlog) do
 		if (offset > 0) or (DisplayedCount >= VisibleLines) then
 			if s.isHeader then
 				if s.isCollapsed == false then
@@ -100,7 +101,7 @@ function Altoholic:Quests_Update()
 		getglobal(entry..i):Hide()
 		i = i + 1
 	end
-	FauxScrollFrame_Update(getglobal(frame.."ScrollFrame"), VisibleCount, VisibleLines, 18);
+	FauxScrollFrame_Update(scrollFrame, VisibleCount, VisibleLines, 18);
 end	
 
 function Altoholic:GetQuestDetails(questString)
@@ -214,4 +215,5 @@ end
 function Altoholic:QUEST_LOG_UPDATE()
 	self:UnregisterEvent("QUEST_LOG_UPDATE")		-- .. and unregister it right away, since we only want it to be processed once (and it's triggered way too often otherwise)
 	self:UpdateQuestLog()	
+	V.NeedsRefresh = true
 end

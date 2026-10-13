@@ -13,20 +13,22 @@ function Altoholic:BagUsage_Update()
 	local VisibleLines = 14
 	local frame = "AltoBags"
 	local entry = frame.."Entry"
+	local e = self:CreateEntryCache(entry, VisibleLines, "Collapse", "Name", "Level", "BagSlotsNormalText", "BankSlotsNormalText")
+	local scrollFrame = getglobal(frame.."ScrollFrame")
 	
 	if table.getn(self.CharacterInfo) == 0 then
-		self:ClearScrollFrame(getglobal(frame.."ScrollFrame"), entry, VisibleLines, 18)
+		self:ClearScrollFrame(scrollFrame, entry, VisibleLines, 18)
 		return
 	end
 	
-	local offset = FauxScrollFrame_GetOffset(getglobal(frame.."ScrollFrame"));
+	local offset = FauxScrollFrame_GetOffset(scrollFrame);
 	local DisplayedCount = 0
 	local VisibleCount = 0
 	local DrawRealm
 	local CurrentFaction, CurrentRealm
 	local i=1
 	
-	for line, s in pairs(self.CharacterInfo) do
+	for line, s in ipairs(self.CharacterInfo) do
 		if (offset > 0) or (DisplayedCount >= VisibleLines) then		-- if the line will not be visible
 			if s.linetype == INFO_REALM_LINE then								-- then keep track of counters
 				CurrentFaction = s.faction
@@ -47,22 +49,22 @@ function Altoholic:BagUsage_Update()
 				CurrentFaction = s.faction
 				CurrentRealm = s.realm
 				if s.isCollapsed == false then
-					getglobal(entry..i.."Collapse"):SetNormalTexture("Interface\\Buttons\\UI-MinusButton-Up"); 
+					e[i].Collapse:SetNormalTexture("Interface\\Buttons\\UI-MinusButton-Up"); 
 					DrawRealm = true
 				else
-					getglobal(entry..i.."Collapse"):SetNormalTexture("Interface\\Buttons\\UI-PlusButton-Up");
+					e[i].Collapse:SetNormalTexture("Interface\\Buttons\\UI-PlusButton-Up");
 					DrawRealm = false
 				end
-				getglobal(entry..i.."Collapse"):Show()
-				getglobal(entry..i.."Name"):SetText(self:GetFullRealmString(s.faction, s.realm))
-				getglobal(entry..i.."Name"):SetJustifyH("LEFT")
-				getglobal(entry..i.."Name"):SetPoint("TOPLEFT", 25, 0)
-				getglobal(entry..i.."Name"):SetWidth(210)
-				getglobal(entry..i.."Level"):SetText("")
-				getglobal(entry..i.."BagSlotsNormalText"):SetText("")
-				getglobal(entry..i.."BankSlotsNormalText"):SetText("")
-				getglobal(entry..i):SetID(line)
-				getglobal(entry..i):Show()
+				e[i].Collapse:Show()
+				e[i].Name:SetText(self:GetFullRealmString(s.faction, s.realm))
+				e[i].Name:SetJustifyH("LEFT")
+				e[i].Name:SetPoint("TOPLEFT", 25, 0)
+				e[i].Name:SetWidth(210)
+				e[i].Level:SetText("")
+				e[i].BagSlotsNormalText:SetText("")
+				e[i].BankSlotsNormalText:SetText("")
+				e[i].entry:SetID(line)
+				e[i].entry:Show()
 				i = i + 1
 				VisibleCount = VisibleCount + 1
 				DisplayedCount = DisplayedCount + 1
@@ -71,28 +73,28 @@ function Altoholic:BagUsage_Update()
 					local c = self.db.account.data[CurrentFaction][CurrentRealm].char[s.name]
 					local color = self:GetClassColor(c.class)
 				
-					getglobal(entry..i.."Collapse"):Hide()
-					getglobal(entry..i.."Name"):SetText(color .. s.name)
-					getglobal(entry..i.."Name"):SetJustifyH("RIGHT")
-					getglobal(entry..i.."Name"):SetPoint("TOPLEFT", 15, 0)
-					getglobal(entry..i.."Name"):SetWidth(70)
-					getglobal(entry..i.."Level"):SetText(color .. "Lv |cFF00FF00" .. c.level .. color .. " " .. c.race .. " " .. c.class)
-					getglobal(entry..i.."Level"):SetJustifyH("LEFT")
-					getglobal(entry..i.."BagSlotsNormalText"):SetText(c.bags)
-					getglobal(entry..i.."BankSlotsNormalText"):SetText(s.bankslots)
+					e[i].Collapse:Hide()
+					e[i].Name:SetText(color .. s.name)
+					e[i].Name:SetJustifyH("RIGHT")
+					e[i].Name:SetPoint("TOPLEFT", 15, 0)
+					e[i].Name:SetWidth(70)
+					e[i].Level:SetText(color .. "Lv |cFF00FF00" .. c.level .. color .. " " .. c.race .. " " .. c.class)
+					e[i].Level:SetJustifyH("LEFT")
+					e[i].BagSlotsNormalText:SetText(c.bags)
+					e[i].BankSlotsNormalText:SetText(s.bankslots)
 				elseif (s.linetype == INFO_TOTAL_LINE) then
-					getglobal(entry..i.."Collapse"):Hide()
-					getglobal(entry..i.."Name"):SetText(L["Totals"])
-					getglobal(entry..i.."Name"):SetJustifyH("LEFT")
-					getglobal(entry..i.."Name"):SetPoint("TOPLEFT", 15, 0)
-					getglobal(entry..i.."Name"):SetWidth(70)
-					getglobal(entry..i.."Level"):SetText(s.level)
-					getglobal(entry..i.."Level"):SetJustifyH("RIGHT")
-					getglobal(entry..i.."BagSlotsNormalText"):SetText("")
-					getglobal(entry..i.."BankSlotsNormalText"):SetText("")
+					e[i].Collapse:Hide()
+					e[i].Name:SetText(L["Totals"])
+					e[i].Name:SetJustifyH("LEFT")
+					e[i].Name:SetPoint("TOPLEFT", 15, 0)
+					e[i].Name:SetWidth(70)
+					e[i].Level:SetText(s.level)
+					e[i].Level:SetJustifyH("RIGHT")
+					e[i].BagSlotsNormalText:SetText("")
+					e[i].BankSlotsNormalText:SetText("")
 				end
-				getglobal(entry..i):SetID(line)
-				getglobal(entry..i):Show()
+				e[i].entry:SetID(line)
+				e[i].entry:Show()
 				i = i + 1
 				VisibleCount = VisibleCount + 1
 				DisplayedCount = DisplayedCount + 1
@@ -101,12 +103,12 @@ function Altoholic:BagUsage_Update()
 	end
 	
 	while i <= VisibleLines do
-		getglobal(entry..i):SetID(0)
-		getglobal(entry..i):Hide()
+		e[i].entry:SetID(0)
+		e[i].entry:Hide()
 		i = i + 1
 	end
 
-	FauxScrollFrame_Update(getglobal(frame.."ScrollFrame"), VisibleCount, VisibleLines, 18);
+	FauxScrollFrame_Update(scrollFrame, VisibleCount, VisibleLines, 18);
 end	
 
 function Altoholic_BagUsage_OnEnter(self)

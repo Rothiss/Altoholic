@@ -6,7 +6,6 @@
 -- *** Open bugs ***
 
 -- .Libs
-local G = AceLibrary("Gratuity-2.0")
 local L = AceLibrary("AceLocale-2.2"):new("Altoholic")
 local BI = LibStub("LibBabble-Inventory-3.0"):GetLookupTable()
 local V = Altoholic.vars
@@ -240,6 +239,23 @@ Altoholic.Books = {
 	[L["Priest"]]	= "Codex",
 }
 
+-- Shared profession table used by GetProfessionID / SelectProfession (ids 1..13)
+local ProfessionList = {
+	BI["Tailoring"],
+	BI["Leatherworking"],
+	BI["Engineering"],
+	BI["Enchanting"],
+	BI["Blacksmithing"],
+	BI["Alchemy"],
+	L["Mining"],
+	BI["First Aid"],
+	BI["Cooking"],
+	BI["Fishing"],
+	L["Riding"],
+	L["Poisons"],
+	L["Lockpicking"]
+}
+
 Altoholic.equipment = {
 	{ color = "|cFF69CCF0", name = BI["Head"], icon = "Interface\\PaperDoll\\UI-PaperDoll-Slot-Head"},
 	{ color = "|cFFABD473", name = BI["Neck"], icon = "Interface\\PaperDoll\\UI-PaperDoll-Slot-Neck"},
@@ -261,6 +277,19 @@ Altoholic.equipment = {
 	{ color = "|cFFABD473", name = L["Ranged"], icon = "Interface\\PaperDoll\\UI-PaperDoll-Slot-Ranged"},
 	{ color = WHITE, name = BI["Tabard"], icon = "Interface\\PaperDoll\\UI-PaperDoll-Slot-Tabard"}
 }
+
+-- Reverse lookup itemID -> {Instance, Boss}, built once from Items/Loots.lua
+-- so tooltip source lookups don't rescan the whole loot table per item.
+Altoholic.LootSources = {}
+for Instance, BossList in pairs(Altoholic.LootTable) do
+	for Boss, LootList in pairs(BossList) do
+		for _, itemID in ipairs(LootList) do
+			if Altoholic.LootSources[itemID] == nil then
+				Altoholic.LootSources[itemID] = { Instance, Boss }
+			end
+		end
+	end
+end
 
 function Altoholic:OnInitialize()
 end
@@ -399,9 +428,12 @@ function Altoholic:OnShow()
 		getglobal("AltoholicFrame_Status"):Show()
 		V.ExpiredMail = nil
 	end
-	self:UpdatePlayerStats()
-	self:UpdatePlayerBags()
-	self:UpdateTalents()
+	if V.NeedsRefresh ~= false then
+		self:UpdatePlayerStats()
+		self:UpdatePlayerBags()
+		self:UpdateTalents()
+		V.NeedsRefresh = false
+	end
 	SetPortraitTexture(AltoholicFramePortrait,"player");
 	V.guild = GetGuildInfo("player")
 	if V.RebuildRecipeMenu then
@@ -481,7 +513,7 @@ function Altoholic:BuildCharacterInfoTable()
 	getglobal("AltoholicFrameTotalLv"):SetText(WHITE .. levels .. " |rLv")
 	getglobal("AltoholicFrameTotalGold"):SetText(floor( money / 10000 ) .. "|cFFFFD700g")
 	getglobal("AltoholicFrameTotalPlayed"):SetText(floor(played / 86400) .. "|cFFFFD700d")
-    SkillsCache = {}
+    V.SkillsCache = {}
     V.Skills = {}
 end
 
@@ -601,18 +633,15 @@ function Altoholic:UpdatePlayerSpells()
     while true do
         local spellName, spellRank = GetSpellName(i, BOOKTYPE_SPELL)
         if not spellName then
-          do break end
+            break
         end
-        if string.find(spellRank, ".*Rank.*") then
-            SpellName = spellName.." ("..spellRank..")"
-        else
-            SpellName = spellName
+        local spell = spellName
+        if spellRank and string.find(spellRank, "Rank") then
+            spell = spellName.." ("..spellRank..")"
         end
-        c.spells[i] = SpellName
+        c.spells[i] = spell
         i = i + 1
     end
-    local i = nil
-    local SpellName = nil
 end
 
 function Altoholic:UpdatePVPStats()
@@ -955,13 +984,13 @@ function Altoholic:BuildMailSubMenu()
 			} )
     		local i = 1
 			for CharacterName, c in pairs(r.char) do
+				local charName = CharacterName
 				if table.getn(c.mail) >= 1 then
-					CharacterNameM = CharacterName .. " " .. GREEN .. L["(has mail)"]
+					charName = CharacterName .. " " .. GREEN .. L["(has mail)"]
 				end
                 local altID = (n*100)+i
 				table.insert(self.Menu[MENU_MAIL].subMenu[n].subMenu, {
-					name = CharacterName,
-                    hasmail = CharacterNameM,
+					name = charName,
 					id = (n*100)+i,
 					OnClick = function(self)
 						Altoholic:SelectAlt(altID)
@@ -1095,13 +1124,13 @@ function Altoholic:BuildAuctionsSubMenu()
 			} )
 			local i = 1
 			for CharacterName, c in pairs(r.char) do
-                local CharacterName = CharacterName
+                local charName = CharacterName
                 if table.getn(c.auctions) >= 1 then
-                    CharacterName = CharacterName .. " " .. GREEN .. L["(has auctions)"]
+                    charName = CharacterName .. " " .. GREEN .. L["(has auctions)"]
                 end
                 local altID = (n*100)+i
 				table.insert(self.Menu[MENU_AUCTIONS].subMenu[n].subMenu, {
-					name = CharacterName,
+					name = charName,
 					id = (n*100)+i,
 					OnClick = function(self)
 						Altoholic.Auctions_Update = Altoholic.Auctions_Update_Auctions
@@ -1132,13 +1161,13 @@ function Altoholic:BuildBidsSubMenu()
 			} )
 			local i = 1
 			for CharacterName, c in pairs(r.char) do
-                local CharacterName = CharacterName
+                local charName = CharacterName
 				if table.getn(c.bids) > 0 then
-					CharacterName = CharacterName .. " " .. GREEN .. L["(has bids)"]
+					charName = CharacterName .. " " .. GREEN .. L["(has bids)"]
 				end
                 local altID = (n*100)+i
 				table.insert(self.Menu[MENU_BIDS].subMenu[n].subMenu, {
-					name = CharacterName,
+					name = charName,
 					id = (n*100)+i,
 					OnClick = function(self)
 						Altoholic.Auctions_Update = Altoholic.Auctions_Update_Bids
@@ -1185,62 +1214,35 @@ function Altoholic:BuildFactionsTable()
 end
 
 function Altoholic:GetProfessionID(skill)
-    local Profs = {
-    [1] = BI["Tailoring"],
-    [2] = BI["Leatherworking"],
-    [3] = BI["Engineering"],
-    [4] = BI["Enchanting"],
-    [5] = BI["Blacksmithing"],
-    [6] = BI["Alchemy"],
-    [7] = L["Mining"],
-    [8] = BI["First Aid"],
-    [9] = BI["Cooking"],
-    [10] = BI["Fishing"],
-    [11] = L["Riding"],
-    [12] = L["Poisons"],
-    [13] = L["Lockpicking"]
-    }
-	for i,v in (Profs) do
-		if skill == v then
+	for i=1, table.getn(ProfessionList) do
+		if skill == ProfessionList[i] then
 			return i
 		end
 	end
 end
 
 function Altoholic:SelectProfession(id)
-    local Profs = {
-    [1] = BI["Tailoring"],
-    [2] = BI["Leatherworking"],
-    [3] = BI["Engineering"],
-    [4] = BI["Enchanting"],
-    [5] = BI["Blacksmithing"],
-    [6] = BI["Alchemy"],
-    [7] = L["Mining"],
-    [8] = BI["First Aid"],
-    [9] = BI["Cooking"],
-    [10] = BI["Fishing"],
-    [11] = L["Riding"],
-    [12] = L["Poisons"],
-    [13] = L["Lockpicking"]
-    }
-    for i,v in (Profs) do
-        if id == i then
-            local ProfessionLevel
-            V.CurrentProfession = v
-            if id < 8 then
-                ProfessionLevel = Altoholic.db.account.data[V.CurrentFaction][V.CurrentRealm].char[V.CurrentAlt].skill[L["Professions"]][V.CurrentProfession]
-            elseif id == 8 or id == 9 or id == 10 or id == 11 then
-                ProfessionLevel = Altoholic.db.account.data[V.CurrentFaction][V.CurrentRealm].char[V.CurrentAlt].skill[L["Secondary Skills"]][V.CurrentProfession]
-            elseif id == 12 or id == 13 then
-                if c.class ~= L["Rogue"] then
-			        return
-		        end
-                ProfessionLevel = Altoholic.db.account.data[V.CurrentFaction][V.CurrentRealm].char[V.CurrentAlt].skill[L["Rogue Proficiencies"]][V.CurrentProfession]
-            end
-            local rank, maxRank = Altoholic:strsplit("|", ProfessionLevel)
-            V.CurrentProfessionLevel = Altoholic:GetSkillColor(tonumber(rank)) .. rank .. "/" .. maxRank
-        end
-    end
+	local char = self.db.account.data[V.CurrentFaction][V.CurrentRealm].char[V.CurrentAlt]
+	for i=1, table.getn(ProfessionList) do
+		if id == i then
+			local ProfessionLevel
+			V.CurrentProfession = ProfessionList[i]
+			if id < 8 then
+				ProfessionLevel = char.skill[L["Professions"]][V.CurrentProfession]
+			elseif (id >= 8) and (id <= 11) then
+				ProfessionLevel = char.skill[L["Secondary Skills"]][V.CurrentProfession]
+			elseif (id == 12) or (id == 13) then
+				if char.class ~= L["Rogue"] then
+					return
+				end
+				ProfessionLevel = char.skill[L["Rogue Proficiencies"]][V.CurrentProfession]
+			end
+			local rank, maxRank = self:strsplit("|", ProfessionLevel)
+			if rank then
+				V.CurrentProfessionLevel = self:GetSkillColor(tonumber(rank)) .. rank .. "/" .. maxRank
+			end
+		end
+	end
 end
 
 function Altoholic:ClearScrollFrame(name, entry, lines, height)
@@ -1266,6 +1268,27 @@ function Altoholic:CreateScrollLines(parentFrame, inheritsFrom, numLines, numIte
 	end
 end
 
+-- Cache child widgets of scroll entry frames. Entries are created once in
+-- OnEnable, so their children never change; looking them up by global name
+-- (string concat + hash) on every draw is wasted work. Cached per prefix.
+Altoholic.EntryCaches = {}
+function Altoholic:CreateEntryCache(prefix, numLines, ...)
+	local cache = self.EntryCaches[prefix]
+	if cache then return cache end
+	local children = {...}
+	cache = {}
+	for i = 1, numLines do
+		local entry = getglobal(prefix .. i)
+		local t = { entry = entry }
+		for _, child in ipairs(children) do
+			t[child] = getglobal(prefix .. i .. child)
+		end
+		cache[i] = t
+	end
+	self.EntryCaches[prefix] = cache
+	return cache
+end
+
 function Altoholic_GetItemLink(itemID)
     if not itemID then return end
     local itemName, itemString, itemQuality = GetItemInfo(itemID)
@@ -1276,13 +1299,13 @@ end
 
 function Altoholic:GetIDFromLink(link)
     if not link then return end
-    local _, _, itemId = string.find(link, ".*item:(%d+).*")
+    local _, _, itemId = string.find(link, "item:(%d+)")
     return tonumber(itemId)
 end
 
 function Altoholic:GetEnchantIDFromLink(link)
     if not link then return end
-    local _, _, itemId = string.find(link, ".*(enchant:%d+).*")
+    local _, _, itemId = string.find(link, "(enchant:%d+)")
     return tostring(itemId)
 end
 
@@ -1408,105 +1431,153 @@ function Altoholic:GetCharacterInfo(line)
 end
 
 function Altoholic:GetItemDropLocation(searchedID)
-	for Instance, BossList in pairs(Altoholic.LootTable) do
-		for Boss, LootList in pairs(BossList) do
-			for itemID, _ in pairs(LootList) do
-				if LootList[itemID] == searchedID then
-					return Instance, Boss
+	local src = self.LootSources[searchedID]
+	if src then
+		return src[1], src[2]
+	end
+	return nil
+end
+
+function Altoholic:BuildItemCountIndex()
+	-- One pass over all saved characters building itemID -> { [CharacterName] = { bags, bank, equi, mail } }
+	-- so tooltip count lookups are O(1) instead of a full DB scan per hovered item.
+	-- Invalidate (V.ItemCountIndex = nil) on BAG_UPDATE / UNIT_INVENTORY_CHANGED / mail & bank changes.
+	local index = {}
+	local chars = self.db.account.data[V.faction][V.realm].char
+	for CharacterName, c in pairs(chars) do
+		for BagName, b in pairs(c.bag) do
+			local isBank
+			if BagName == "Bag100" then
+				isBank = true
+			elseif BagName == "Bag-2" then
+				isBank = false
+			else
+				local bagNum = tonumber(string.sub(BagName, 4))
+				isBank = not ((bagNum ~= nil) and (bagNum >= 0) and (bagNum <= 4))
+			end
+			for slotID=1, b.size do
+				local id = b.ids[slotID]
+				if id ~= nil then
+					local itemCount = b.counts[slotID]
+					if (itemCount == nil) or (itemCount == 0) then
+						itemCount = 1
+					end
+					local entry = index[id]
+					if entry == nil then
+						entry = {}
+						index[id] = entry
+					end
+					local ch = entry[CharacterName]
+					if ch == nil then
+						ch = { bags = 0, bank = 0, equi = 0, mail = 0 }
+						entry[CharacterName] = ch
+					end
+					if isBank then
+						ch.bank = ch.bank + itemCount
+					else
+						ch.bags = ch.bags + itemCount
+					end
+				end
+			end
+		end
+		for slotID=1, 19 do
+			local s = c.inventory[slotID]
+			if s ~= nil then
+				local id
+				if type(s) == "number" then
+					id = s
+				else
+					id = self:GetIDFromLink(s)
+				end
+				if id then
+					local entry = index[id]
+					if entry == nil then
+						entry = {}
+						index[id] = entry
+					end
+					local ch = entry[CharacterName]
+					if ch == nil then
+						ch = { bags = 0, bank = 0, equi = 0, mail = 0 }
+						entry[CharacterName] = ch
+					end
+					ch.equi = ch.equi + 1
+				end
+			end
+		end
+		for slotID=1, table.getn(c.mail) do
+			local s = c.mail[slotID]
+			if s.link ~= nil then
+				local id = self:GetIDFromLink(s.link)
+				if id then
+					local entry = index[id]
+					if entry == nil then
+						entry = {}
+						index[id] = entry
+					end
+					local ch = entry[CharacterName]
+					if ch == nil then
+						ch = { bags = 0, bank = 0, equi = 0, mail = 0 }
+						entry[CharacterName] = ch
+					end
+					local itemCount = s.count
+					if (itemCount == nil) or (itemCount == 0) then
+						itemCount = 1
+					end
+					ch.mail = ch.mail + itemCount
 				end
 			end
 		end
 	end
-	return nil
+	V.ItemCountIndex = index
 end
 
 function Altoholic:GetItemCount(searchedID)
 	if V.ItemCount == nil then
 		V.ItemCount = {}
 	end
+	if V.ItemCountIndex == nil then
+		self:BuildItemCountIndex()
+	end
+	local data = V.ItemCountIndex[searchedID]
 	local count = 0
-	for CharacterName, c in pairs(self.db.account.data[V.faction][V.realm].char) do
-		local bagCount = 0
-		local bankCount = 0
-		for BagName, b in pairs(c.bag) do
-			for slotID=1, b.size do
-				local id = b.ids[slotID]
-				if (id) and (id == searchedID) then
-					local itemCount
-					if (b.counts[slotID] == nil) or (b.counts[slotID] == 0) then
-						itemCount = 1
-					else
-						itemCount = b.counts[slotID]
-					end
-					if (BagName == "Bag100") then
-						bankCount = bankCount + itemCount
-					elseif (BagName == "Bag-2") then
-						bagCount = bagCount + itemCount
-					else
-						local bagNum = tonumber(string.sub(BagName, 4))
-						if (bagNum >= 0) and (bagNum <= 4) then
-							bagCount = bagCount + itemCount
-						else
-							bankCount = bankCount + itemCount
-						end
+	if data ~= nil then
+		local chars = self.db.account.data[V.faction][V.realm].char
+		for CharacterName, c in pairs(data) do
+			local bagCount = c.bags
+			local bankCount = c.bank
+			local equipCount = c.equi
+			local mailCount = c.mail
+			local charCount = bagCount + bankCount + equipCount + mailCount
+			count = count + charCount
+			if charCount > 0 then
+				local charInfo = ORANGE .. charCount .. WHITE .. " ("
+				if bagCount > 0 then
+					charInfo = charInfo .. WHITE .. L["Bags"] .. ": "  .. TEAL .. bagCount
+					charCount = charCount - bagCount
+					if charCount > 0 then
+						charInfo = charInfo .. WHITE .. L[", "]
 					end
 				end
-			end
-		end
-		local equipCount = 0
-		for slotID=1, 19 do
-			local s = c.inventory[slotID]
-			if (s ~= nil) then
-				if type(s) == "number" then
-					if (s == searchedID) then
-						equipCount = equipCount + 1
+				if bankCount > 0 then
+					charInfo = charInfo .. WHITE .. L["Bank"] .. ": " .. TEAL .. bankCount
+					charCount = charCount - bankCount
+					if charCount > 0 then
+						charInfo = charInfo .. WHITE .. L[", "]
 					end
-				elseif self:GetIDFromLink(s) == searchedID then
-					equipCount = equipCount + 1
 				end
-			end
-		end
-		local mailCount = 0
-		for slotID=1, table.getn(c.mail) do
-			local s = c.mail[slotID]
-			if (s.link ~= nil) and (self:GetIDFromLink(s.link) == searchedID) then
-				if (s.count == nil) or (s.count == 0) then
-					mailCount = mailCount + 1
-				else
-					mailCount = mailCount + s.count
+				if equipCount > 0 then
+					charInfo = charInfo .. WHITE .. L["Equipped"] .. ": "  .. TEAL .. equipCount
+					charCount = charCount - equipCount
+					if charCount > 0 then
+						charInfo = charInfo .. WHITE .. L[", "]
+					end
 				end
-			end
-		end
-		local charCount = bagCount + bankCount + equipCount + mailCount
-		count = count + charCount
-		if charCount > 0 then
-			local charInfo = ORANGE .. charCount .. WHITE .. " ("
-			if bagCount > 0 then
-				charInfo = charInfo .. WHITE .. L["Bags"] .. ": "  .. TEAL .. bagCount
-				charCount = charCount - bagCount
-				if charCount > 0 then
-					charInfo = charInfo .. WHITE .. L[", "]
+				if mailCount > 0 then
+					charInfo = charInfo .. WHITE .. L["Mail"] .. ": "  .. TEAL .. mailCount
 				end
+				charInfo = charInfo .. WHITE .. ")"
+				V.ItemCount[self:GetClassColor(chars[CharacterName].class) .. CharacterName] = charInfo
 			end
-			if bankCount > 0 then
-				charInfo = charInfo .. WHITE .. L["Bank"] .. ": " .. TEAL .. bankCount
-				charCount = charCount - bankCount
-				if charCount > 0 then
-					charInfo = charInfo .. WHITE .. L[", "]
-				end
-			end
-			if equipCount > 0 then
-				charInfo = charInfo .. WHITE .. L["Equipped"] .. ": "  .. TEAL .. equipCount
-				charCount = charCount - equipCount
-				if charCount > 0 then
-					charInfo = charInfo .. WHITE .. L[", "]
-				end
-			end
-			if mailCount > 0 then
-				charInfo = charInfo .. WHITE .. L["Mail"] .. ": "  .. TEAL .. mailCount
-			end
-			charInfo = charInfo .. WHITE .. ")"
-			V.ItemCount[Altoholic:GetClassColor(c.class) .. CharacterName] = charInfo
 		end
 	end
 	return count
@@ -1910,6 +1981,7 @@ function Altoholic:PLAYER_ALIVE()
 	c.class = UnitClass("player")
 	self:UpdatePlayerStats()
 	self:UpdateTalents()
+	V.NeedsRefresh = true
 end
 
 function Altoholic:AceEvent_FullyInitialized()
@@ -1934,6 +2006,7 @@ end
 
 function Altoholic:PLAYER_LEVEL_UP(newLevel)
 	self.db.account.data[V.faction][V.realm].char[V.player].level = newLevel
+	V.NeedsRefresh = true
 end
 
 function Altoholic:PLAYER_XP_UPDATE()
@@ -1941,14 +2014,17 @@ function Altoholic:PLAYER_XP_UPDATE()
 	c.xp = UnitXP("player")
 	c.xpmax = UnitXPMax("player")
 	c.restxp = GetXPExhaustion()
+	V.NeedsRefresh = true
 end
 
 function Altoholic:PLAYER_MONEY()
 	self.db.account.data[V.faction][V.realm].char[V.player].money = GetMoney();
+	V.NeedsRefresh = true
 end
 
 function Altoholic:PLAYER_UPDATE_RESTING()
 	self.db.account.data[V.faction][V.realm].char[V.player].isResting = IsResting();
+	V.NeedsRefresh = true
 end
 
 function Altoholic:PLAYER_GUILD_UPDATE()
@@ -1971,6 +2047,7 @@ function Altoholic:UpdatePlayerLocation()
 	local c = self.db.account.data[V.faction][V.realm].char[V.player]
 	c.zone = GetRealZoneText()
 	c.subzone = GetSubZoneText()
+	V.NeedsRefresh = true
 end
 
 function Altoholic:PLAYER_LOGOUT()
@@ -1979,37 +2056,57 @@ end
 
 function Altoholic:TIME_PLAYED_MSG(TotalTime, CurrentLevelTime)
 	self.db.account.data[V.faction][V.realm].char[V.player].played = TotalTime
+	V.NeedsRefresh = true
 end
 
 function Altoholic:UNIT_INVENTORY_CHANGED()
+	V.ItemCountIndex = nil
+	V.NeedsRefresh = true
 	self:UpdateEquipment()
 end
 
 function Altoholic:BAG_UPDATE(bag)
 	V.ToolTipCachedItemID = nil
-	if (bag >= 5) and (bag <= 11) and not V.isBankOpen then
-		return
-	end
+	V.ItemCountIndex = nil
+	V.NeedsRefresh = true
 	if V.isMailBoxOpen then
 		self:UpdatePlayerMail()
 	end
-    self:UpdatePlayerBags()
-    self:UpdatePlayerInventory()
+	if (bag >= 5) and (bag <= 11) and not V.isBankOpen then
+		return
+	end
+	-- Only rescan the bag that actually changed instead of all bags + keyring
+	if (bag >= 0) and (bag <= 4) then
+		self:UpdatePlayerBag(bag)
+		self:UpdatePlayerInventory()
+	elseif bag == -2 then
+		self:UpdateKeyRing()
+	elseif (bag >= 5) and (bag <= 11) then
+		self:UpdatePlayerBag(bag)
+	else
+		-- unknown/nil bag id: fall back to a full rescan
+		self:UpdatePlayerBags()
+		self:UpdatePlayerInventory()
+	end
 end
 
 function Altoholic:BANKFRAME_OPENED()
     self:UpdatePlayerBank()
 	V.isBankOpen = true
+	V.NeedsRefresh = true
 	self:RegisterEvent("PLAYERBANKSLOTS_CHANGED")
 end
 
 function Altoholic:BANKFRAME_CLOSED()
 	V.isBankOpen = nil
+	V.ItemCountIndex = nil
 	if self:IsEventRegistered("PLAYERBANKSLOTS_CHANGED") then
 		self:UnregisterEvent("PLAYERBANKSLOTS_CHANGED")
 	end
 end
 
 function Altoholic:PLAYERBANKSLOTS_CHANGED()
+	V.ItemCountIndex = nil
+	V.NeedsRefresh = true
 	self:UpdatePlayerBank(false)
 end
