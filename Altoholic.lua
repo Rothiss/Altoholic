@@ -440,9 +440,15 @@ end
 
 function Altoholic:ActivateMenuItem(frame)
 	for k, v in pairs(self.Categories) do
-       	getglobal(v):Hide()
+		local f = getglobal(v)
+		if f then
+			f:Hide()
+		end
 	end
-	getglobal(frame):Show()
+	local target = getglobal(frame)
+	if target then
+		target:Show()
+	end
 end
 
 function Altoholic:OnShow()
@@ -490,18 +496,20 @@ function Altoholic:BuildCharacterInfoTable()
 				V.Skills[2] = ""
 				V.SkillsCache[1] = 0
 				V.SkillsCache[2] = 0
+				local professions = c.skill[L["Professions"]] or {}
+				local secondary = c.skill[L["Secondary Skills"]] or {}
 				local i = 1
-				for SkillName, s in pairs(c.skill[L["Professions"]]) do
+				for SkillName, s in pairs(professions) do
 					V.SkillsCache[i] = self:GetSkillInfo(s)
 					V.Skills[i] = SkillName
 					i = i + 1
 				end
-				V.SkillsCache[3] = self:GetSkillInfo( c.skill[L["Secondary Skills"]][BI["Cooking"]] )
-				V.SkillsCache[4] = self:GetSkillInfo( c.skill[L["Secondary Skills"]][BI["First Aid"]] )
-				V.SkillsCache[5] = self:GetSkillInfo( c.skill[L["Secondary Skills"]][BI["Fishing"]] )
-				V.SkillsCache[6] = self:GetSkillInfo( c.skill[L["Secondary Skills"]][L["Riding"]] )
-				V.SkillsCache[7] = self:GetSkillInfo( c.skill[L["Secondary Skills"]][L["Survival"]] )
-				V.SkillsCache[8] = self:GetSkillInfo( c.skill[L["Secondary Skills"]][L["Disguise"]] )
+				V.SkillsCache[3] = self:GetSkillInfo( secondary[BI["Cooking"]] )
+				V.SkillsCache[4] = self:GetSkillInfo( secondary[BI["First Aid"]] )
+				V.SkillsCache[5] = self:GetSkillInfo( secondary[BI["Fishing"]] )
+				V.SkillsCache[6] = self:GetSkillInfo( secondary[L["Riding"]] )
+				V.SkillsCache[7] = self:GetSkillInfo( secondary[L["Survival"]] )
+				V.SkillsCache[8] = self:GetSkillInfo( secondary[L["Disguise"]] )
 				local color = self:GetClassColor(c.class)
 				local bank
 				if (c.bankslots == nil) or (c.bankslots == "") then
@@ -1268,15 +1276,18 @@ function Altoholic:SelectProfession(id)
 		if id == i then
 			local ProfessionLevel
 			V.CurrentProfession = ProfessionList[i]
+			local professions = char.skill[L["Professions"]] or {}
+			local secondary = char.skill[L["Secondary Skills"]] or {}
+			local rogue = char.skill[L["Rogue Proficiencies"]] or {}
 			if (id <= 7) or (id == 14) then		-- primary professions (incl. Jewelcrafting)
-				ProfessionLevel = char.skill[L["Professions"]][V.CurrentProfession]
+				ProfessionLevel = professions[V.CurrentProfession]
 			elseif ((id >= 8) and (id <= 11)) or (id == 15) or (id == 16) then	-- secondary (incl. Survival, Disguise)
-				ProfessionLevel = char.skill[L["Secondary Skills"]][V.CurrentProfession]
+				ProfessionLevel = secondary[V.CurrentProfession]
 			elseif (id == 12) or (id == 13) then
 				if char.class ~= L["Rogue"] then
 					return
 				end
-				ProfessionLevel = char.skill[L["Rogue Proficiencies"]][V.CurrentProfession]
+				ProfessionLevel = rogue[V.CurrentProfession]
 			end
 			local rank, maxRank = self:strsplit("|", ProfessionLevel)
 			if rank then
@@ -1828,11 +1839,13 @@ end
 function Altoholic:AltHasTradeSkill(c, prof)
     local r = self.db.account.data[V.faction][V.realm].char[c]
     if c then
-        local minSkillp, _ = Altoholic:GetSkillInfo(r.skill[L["Professions"]][prof])
+        local professions = r.skill[L["Professions"]] or {}
+        local secondary = r.skill[L["Secondary Skills"]] or {}
+        local minSkillp, _ = Altoholic:GetSkillInfo(professions[prof])
         if minSkillp > 0 then
             return true
         end      
-        local minSkills, _ = Altoholic:GetSkillInfo(r.skill[L["Secondary Skills"]][prof])
+        local minSkills, _ = Altoholic:GetSkillInfo(secondary[prof])
         if minSkills > 0 then
             return true
         end

@@ -141,31 +141,34 @@ function Altoholic_Skill_OnEnter(self)
 	local skill, rank, suggestion
 	local Faction, Realm = Altoholic:GetCharacterInfo(line)
 	local c = Altoholic.db.account.data[Faction][Realm].char[s.name]
+	local professions = c.skill[L["Professions"]] or {}
+	local secondary = c.skill[L["Secondary Skills"]] or {}
+	local classSkills = c.skill["Class Skills"] or {}
 	local curRank, maxRank
 	if id == 1 then
 		skill = s.skillName1
-		curRank, maxRank = Altoholic:GetSkillInfo( c.skill[L["Professions"]][skill] )
+		curRank, maxRank = Altoholic:GetSkillInfo( professions[skill] )
 	elseif id == 2 then
 		skill = s.skillName2
-		curRank, maxRank = Altoholic:GetSkillInfo( c.skill[L["Professions"]][skill] )
+		curRank, maxRank = Altoholic:GetSkillInfo( professions[skill] )
 	elseif id == 3 then
 		skill = BI["Cooking"]
-		curRank, maxRank = Altoholic:GetSkillInfo( c.skill[L["Secondary Skills"]][BI["Cooking"]] )
+		curRank, maxRank = Altoholic:GetSkillInfo( secondary[BI["Cooking"]] )
 	elseif id == 4 then
 		skill = BI["First Aid"]
-		curRank, maxRank = Altoholic:GetSkillInfo( c.skill[L["Secondary Skills"]][BI["First Aid"]] )
+		curRank, maxRank = Altoholic:GetSkillInfo( secondary[BI["First Aid"]] )
 	elseif id == 5 then
 		skill = BI["Fishing"]
-		curRank, maxRank = Altoholic:GetSkillInfo( c.skill[L["Secondary Skills"]][BI["Fishing"]] )
+		curRank, maxRank = Altoholic:GetSkillInfo( secondary[BI["Fishing"]] )
 	elseif id == 6 then
 		skill = L["Riding"]
-		curRank, maxRank = Altoholic:GetSkillInfo( c.skill[L["Secondary Skills"]][L["Riding"]] )
+		curRank, maxRank = Altoholic:GetSkillInfo( secondary[L["Riding"]] )
 	elseif id == 8 then
 		skill = L["Survival"]
-		curRank, maxRank = Altoholic:GetSkillInfo( c.skill[L["Secondary Skills"]][L["Survival"]] )
+		curRank, maxRank = Altoholic:GetSkillInfo( secondary[L["Survival"]] )
 	elseif id == 9 then
 		skill = L["Disguise"]
-		curRank, maxRank = Altoholic:GetSkillInfo( c.skill[L["Secondary Skills"]][L["Disguise"]] )
+		curRank, maxRank = Altoholic:GetSkillInfo( secondary[L["Disguise"]] )
 	end
 	if ((id >= 1) and (id <= 6)) or (id == 8) or (id == 9) then
 		rank = Altoholic:GetSkillColor(curRank) .. curRank .. "/" .. maxRank
@@ -175,8 +178,8 @@ function Altoholic_Skill_OnEnter(self)
 			return
 		end
 		skill = L["Rogue Proficiencies"]
-		local curLock, maxLock = Altoholic:GetSkillInfo( c.skill["Class Skills"][L["Lockpicking"]] )
-		local curPois, maxPois = Altoholic:GetSkillInfo( c.skill["Class Skills"][L["Poisons"]] )
+		local curLock, maxLock = Altoholic:GetSkillInfo( classSkills[L["Lockpicking"]] )
+		local curPois, maxPois = Altoholic:GetSkillInfo( classSkills[L["Poisons"]] )
 		rank = TEAL .. L["Lockpicking"] .. " " .. curLock .. "/" .. maxLock .. "\n" 
 						.. L["Poisons"] .. " " .. curPois .. "/" .. maxPois
 		suggestion = Altoholic:GetSuggestion(L["Lockpicking"], curLock)

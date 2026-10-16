@@ -25,7 +25,7 @@ function Altoholic:Recipes_Update()
 	local frame = "AltoRecipes"
 	local entry = frame.."Entry"
 	if c.recipes[V.CurrentProfession].ScanFailed then
-		getglobal("AltoholicFrame_Status"):SetText(L["No data: "] .. V.CurrentProfession .. L[" scan failed for "] ": |cFFFFD700" .. V.CurrentAlt .. " of ".. V.CurrentRealm)
+		getglobal("AltoholicFrame_Status"):SetText(L["No data: "] .. V.CurrentProfession .. L[" scan failed for "] .. ": |cFFFFD700" .. V.CurrentAlt .. " of ".. V.CurrentRealm)
 		getglobal("AltoholicFrame_Status"):Show()
 		self:ClearScrollFrame(getglobal(frame.."ScrollFrame"), entry, VisibleLines, 18)
 		return

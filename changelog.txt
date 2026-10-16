@@ -9,6 +9,10 @@
 	- Fixed item icons (Containers, Equipment, Auctions, Search, recipe reagents): the icon is the
 	  9th return value of GetItemInfo on 1.12 clients, not the 10th.
 
+	- Fixed a crash on the Recipes screen when a profession's recipe scan had failed (a missing
+	  string concatenation operator in the status line). Also hardened the shared UI so a single
+	  missing/empty panel can no longer blank the whole window.
+
 ****************************************************************************************************
 	v1.0.9
 	- RightClick menus fixed - root cause: renamed frames from previous release
